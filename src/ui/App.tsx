@@ -1,42 +1,14 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
 import "./App.css";
+import { QueryClient, QueryClientProvider, } from "@tanstack/react-query";
+import { MainFrame } from "./components/MainFrame";
 
-function App() {
-  const [count, setCount] = useState(0);
+const queryClient = new QueryClient()
 
-  useEffect(() => {
-    async function fetchCpuModel() {
-      const cpuModel = await window.electron.getCpuModel();
-      console.log("CPU Model:", cpuModel);
-    }
-
-    fetchCpuModel();
-  }, []);
-
-  useEffect(() => {
-    const unsub = window.electron.subscribeToRamUsage((ramUsage) =>
-      console.log("ramUsage: ", ramUsage)
-    );
-
-    return unsub;
-  }, []);
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React + Typescript + Electron</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <MainFrame />
+    </QueryClientProvider>
   );
 }
 
-export default App;
