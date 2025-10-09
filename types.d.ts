@@ -4,6 +4,7 @@ interface Window {
     subscribeToRamUsage: (
       callback: (ramUsage: RamUsage) => void
     ) => UnsubscribeFn;
+    getCheapestDay: () => Promise<string>
   };
 }
 
@@ -15,6 +16,7 @@ type RamUsage = {
 type EventPayloadMap = {
   getCpuModel: string;
   ramUsage: RamUsage;
+  getCheapestDay: string;
 };
 
 type UnsubscribeFn = () => void;

@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("electron", {
   subscribeToRamUsage: (callback) => {
     return ipcOn("ramUsage", (ramUsage) => callback(ramUsage));
   },
+  getCheapestDay: () => ipcInvoke('getCheapestDay')
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMap>(

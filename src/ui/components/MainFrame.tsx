@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 export const MainFrame = () => {
-  const [cheapestDay, setCheapestDay] = useState<string>()
+  const [cheapestDay, setCheapestDay] = useState<string>();
 
   async function getCheapestDayClick() {
     const cheapestDay = await window.electron.getCheapestDay();
-    setCheapestDay(cheapestDay)
+    setCheapestDay(cheapestDay);
   }
 
 
@@ -15,5 +15,5 @@ export const MainFrame = () => {
       <span>{cheapestDay}</span>
       <button onClick={getCheapestDayClick}>Find cheapest day</button>
     </div>
-  )
-}
+  );
+};

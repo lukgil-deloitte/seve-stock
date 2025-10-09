@@ -9,17 +9,24 @@ export const CompanySymbolMap = {
   'Dino Polska': 'dnp',
   'CD Projekt': 'cdr',
   'PGE': 'pge'
-} as const
+} as const;
 
-function createRecordObject(record: string) {
-  const recordData = record.split(',')
-  const open = parseFloat(recordData[1])
-  const high = parseFloat(recordData[2])
-  const low = parseFloat(recordData[3])
-  const close = parseFloat(recordData[4])
-  // const avg = (open + high + low + close) / 4
-  const avg = (open + close) / 2
+export interface StockRecord {
+  date: string;
+  open: number
+  high: number
+  low: number
+  close: number
+  avg: number
+}
 
+function createRecordObject(record: string): StockRecord {
+  const recordData = record.split(',');
+  const open = parseFloat(recordData[1]);
+  const high = parseFloat(recordData[2]);
+  const low = parseFloat(recordData[3]);
+  const close = parseFloat(recordData[4]);
+  const avg = (open + close) / 2;
 
   return {
     date: recordData[0],
@@ -28,27 +35,24 @@ function createRecordObject(record: string) {
     low,
     close,
     avg
-  }
+  };
 }
 
 
 export async function fetchStockData(company: string, startDate: string, endDate: string) {
-  const url = `https://stooq.com/q/d/l/?s=${company}&d1=${startDate}&d2=${endDate}&i=d`
-  let res: Response
-
+  const url = `https://stooq.com/q/d/l/?s=${company}&d1=${startDate}&d2=${endDate}&i=d`;
   try {
-    res = await fetch(url);
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${company}`);
 
     const data = await res.text();
     if (!data || data.trim().length === 0) throw new Error(`Empty response for ${company}`);
 
-    const records = data.trim().split(/\r?\n/)
-    records.shift()
-    return records.map(record => createRecordObject(record))
+    const records = data.trim().split(/\r?\n/);
+    records.shift();
+    return records.map(record => createRecordObject(record));
 
   } catch (err) {
-    console.error('Site unavailable - ', err)
+    console.error('Site unavailable - ', err);
   }
-
 }
