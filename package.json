@@ -21,6 +21,8 @@
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "dependencies": {
+    "date-fns": "^4.1.0",
+    "puppeteer": "^24.24.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
