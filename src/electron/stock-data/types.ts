@@ -1,5 +1,3 @@
-import { CompanySymbolMap } from "./constants.js";
-
 export interface StockRecord {
   date: string;
   open: number
@@ -8,5 +6,3 @@ export interface StockRecord {
   close: number
   avg: number
 };
-
-export type StockCompany = keyof typeof CompanySymbolMap;
