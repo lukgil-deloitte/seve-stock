@@ -1,10 +1,10 @@
 import path from 'path';
 import fs from 'fs';
+import { differenceInMinutes } from 'date-fns';
 
-import { stockDataDir } from "./constants.js";
-import { StockRecord } from "./types.js";
-import { convertNativeDateToStooqDate, convertStringDateToStooqDate } from './dates.js';
-
+import { stockDataCacheDirname } from "./constants.js";
+import { StockRecord, StockRecordCache } from "./types.js";
+import { convertNativeDateToStooqDate, convertStringDateToStooqDate, timestampParser } from './utils.js';
 
 function createStockDataObject(record: string): StockRecord {
   const recordData = record.split(',');
@@ -35,49 +35,52 @@ export async function fetchStockData(companySymbol: string) {
 
     const records = data.trim().split(/\r?\n/);
     records.shift();
-    return records.map(record => createStockDataObject(record));
+    const stockData = records.map(record => createStockDataObject(record));
+    const today = new Date();
+
+    const stockDataWithTimestamp = {
+      timestamp: today,
+      stockData
+    };
+
+    const filePath = path.join(stockDataCacheDirname, `${companySymbol}.json`);
+    fs.mkdirSync(stockDataCacheDirname, { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(stockDataWithTimestamp, null, 2));
+
+    return stockData;
 
   } catch (err) {
     console.error('Site unavailable - ', err);
   }
 }
 
-export function saveStockData(company: string, data: StockRecord[]) {
-  const filePath = path.join(stockDataDir, `${company}.json`);
-  fs.mkdirSync(stockDataDir, { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
-
-export function getStockData(company: string, startDate: string) {
+export async function getFreshStockData(companySymbol: string, startDate: string) {
   const endDate = convertNativeDateToStooqDate(new Date());
+  const filePath = path.join(stockDataCacheDirname, `${companySymbol}.json`);
+  let freshStockData: StockRecord[] | undefined;
 
-  const filePath = path.join(stockDataDir, `${company}.json`);
-  const savedStockData = fs.readFileSync(filePath, 'utf-8');
-  const parsedData: StockRecord[] = JSON.parse(savedStockData);
-  const filteredData = parsedData.filter((stockRecord) =>
+  try {
+    const rawData = fs.readFileSync(filePath, 'utf-8');
+    const parsedData: StockRecordCache = JSON.parse(rawData, timestampParser);
+    const { timestamp, stockData } = parsedData;
+    const minutesSinceUpdate = differenceInMinutes(new Date(), timestamp);
+
+    if (minutesSinceUpdate >= 60) {
+      freshStockData = await fetchStockData(companySymbol);
+    } else {
+      freshStockData = stockData;
+    }
+
+  } catch (e) {
+    if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
+      freshStockData = await fetchStockData(companySymbol);
+    } else {
+      throw new Error('Unknown error :(');
+    }
+  }
+
+  return freshStockData?.filter((stockRecord) =>
     convertStringDateToStooqDate(stockRecord.date) >= startDate &&
     convertStringDateToStooqDate(stockRecord.date) <= endDate);
-
-  return filteredData;
 }
 
-export async function scrapCompanies() {
-  const res = await fetch('https://pl.tradingview.com/markets/stocks-poland/market-movers-large-cap/');
-  const html = await res.text();
-  const matchedData = [...html.matchAll(/data-rowkey="GPW:([A-Z]+)[\s\S]*?https:\/\/s3-symbol-logo\.tradingview\.com\/([^.]+)/g)];
-
-  const companiesWithSymbols = matchedData.map(m => ({
-    symbol: m[1],
-    name: m[2]
-  }));
-  const today = new Date();
-
-  const companiesWithSymbolsWithTimestamp = {
-    timestamp: today,
-    companiesWithSymbols
-  };
-
-  const filePath = path.join(stockDataDir, `companies-and-symbols.json`);
-  fs.mkdirSync(stockDataDir, { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(companiesWithSymbolsWithTimestamp, null, 2));
-}

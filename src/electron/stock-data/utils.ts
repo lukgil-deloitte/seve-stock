@@ -9,3 +9,7 @@ export function convertStringDateToStooqDate(date: string) {
 export function convertNativeDateToStooqDate(date: Date) {
   return format(date, 'yyyyMMdd');
 }
+
+export function timestampParser(key: string, value: unknown) {
+  return key === 'timestamp' ? new Date(value as string) : value;
+}

@@ -1,1 +1,3 @@
-export const stockDataDir = 'stock-data';
+export const stockDataCacheDirname = 'stock-data-cache';
+
+export const companiesListFilename = 'companies-list.json';

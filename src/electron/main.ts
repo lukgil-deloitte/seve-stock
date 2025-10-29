@@ -3,16 +3,29 @@ import { app, BrowserWindow } from "electron";
 import { ipcMainHandle, isDev } from "./utils.js";
 import { getPreloadPath, getUIPath } from "./path-resolver.js";
 import { getCpuModel, sendRamUsage } from "./node-example.js";
-import { fetchStockData, getStockData, saveStockData, scrapCompanies } from "./stock-data/stock-data.js";
+import { fetchStockData, getFreshStockData } from "./stock-data/stock-data.js";
 import { getAveragePrice, getCurrentDiscount } from "./stock-data/formulas.js";
-import { stockDataDir } from "./stock-data/constants.js";
+import { CompanyWithSymbol } from "./stock-data/types.js";
+import { getFreshCompaniesList } from "./stock-data/companies-list.js";
 
-const startDate = '20201013';
+
+
+let companiesList: CompanyWithSymbol[] | undefined;
+
+
+
+async function prepareData() {
+  companiesList = await getFreshCompaniesList();
+  companiesList.forEach(({ symbol }) => getFreshStockData(symbol, '20251025'));
+}
 
 app.whenReady().then(async () => {
+  await prepareData();
   const company = "MOL";
   const data = await fetchStockData(company);
-  if (data != null) saveStockData(company, data);
+
+  const pknData = await getFreshStockData('pkn', '20251027');
+  console.log(pknData);
 
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -27,21 +40,9 @@ app.whenReady().then(async () => {
   } else {
     mainWindow.loadFile(getUIPath());
   }
+
   mainWindow.webContents.openDevTools();
-
-
-  // const records = await getStockData('PKN ORLEN', startDate);
-  // const avgPrice = getAveragePrice(records);
-  // console.log('avgPrice', avgPrice);
-  // const currentPrice = records[records.length - 1].avg;
-  // console.log('currentPrice', currentPrice);
-  // const currentDiscount = getCurrentDiscount(avgPrice, currentPrice);
-  // console.log('currentDiscount', currentDiscount);
-
-  scrapCompanies();
-
   sendRamUsage(mainWindow);
-
   ipcMainHandle("getCpuModel", () => getCpuModel());
 
   mainWindow.on("closed", () => {
