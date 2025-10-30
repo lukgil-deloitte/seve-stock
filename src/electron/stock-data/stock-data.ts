@@ -32,6 +32,7 @@ export async function fetchStockData(companySymbol: string) {
 
     const data = await res.text();
     if (!data || data.trim().length === 0) throw new Error(`Empty response for ${companySymbol}`);
+    if (data === 'Exceeded the daily hits limit') throw new Error(`Exceeded the daily hits limit when fetching ${companySymbol}`);
 
     const records = data.trim().split(/\r?\n/);
     records.shift();
@@ -50,11 +51,11 @@ export async function fetchStockData(companySymbol: string) {
     return stockData;
 
   } catch (err) {
-    console.error('Site unavailable - ', err);
+    console.error('[ERROR]:[fetchStockData]', err);
   }
 }
 
-export async function getFreshStockData(companySymbol: string, startDate: string) {
+export async function getFreshStockData(companySymbol: string, startDate = '20100101') {
   const endDate = convertNativeDateToStooqDate(new Date());
   const filePath = path.join(stockDataCacheDirname, `${companySymbol}.json`);
   let freshStockData: StockRecord[] | undefined;
@@ -63,19 +64,26 @@ export async function getFreshStockData(companySymbol: string, startDate: string
     const rawData = fs.readFileSync(filePath, 'utf-8');
     const parsedData: StockRecordCache = JSON.parse(rawData, timestampParser);
     const { timestamp, stockData } = parsedData;
-    const minutesSinceUpdate = differenceInMinutes(new Date(), timestamp);
 
+    if (stockData.length === 0) throw new Error('Empty cache file');
+
+    const minutesSinceUpdate = differenceInMinutes(new Date(), timestamp);
     if (minutesSinceUpdate >= 60) {
       freshStockData = await fetchStockData(companySymbol);
     } else {
       freshStockData = stockData;
     }
 
-  } catch (e) {
-    if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
+  } catch (err) {
+    if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+      console.log(`[LOG]:[getFreshStockData] No cache file found for ${companySymbol}, trying to fetch...`);
       freshStockData = await fetchStockData(companySymbol);
-    } else {
-      throw new Error('Unknown error :(');
+    } else if (err instanceof Error && err.message === 'Empty cache file') {
+      console.log(`[LOG]:[getFreshStockData] Cache file for ${companySymbol} is empty, trying to fetch...`);
+      freshStockData = await fetchStockData(companySymbol);
+    }
+    else {
+      console.error('[ERROR]:[getFreshStockData]', err);
     }
   }
 
