@@ -8,28 +8,32 @@ import { timestampParser } from './utils.js';
 
 
 export async function scrapCompanies() {
-  const res = await fetch(
-    'https://pl.tradingview.com/markets/stocks-poland/market-movers-large-cap/');
-  const html = await res.text();
-  const matchedData = [...html.matchAll(
-    /data-rowkey="GPW:([A-Z]+)[\s\S]*?https:\/\/s3-symbol-logo\.tradingview\.com\/([^.]+)/g)];
+  try {
+    const res = await fetch(
+      'https://pl.tradingview.com/markets/stocks-poland/market-movers-large-cap/');
+    const html = await res.text();
+    const matchedData = [...html.matchAll(
+      /data-rowkey="GPW:([A-Z]+)[\s\S]*?https:\/\/s3-symbol-logo\.tradingview\.com\/([^.]+)/g)];
 
-  const companiesList = matchedData.map(m => ({
-    symbol: m[1],
-    company: m[2]
-  }));
-  const today = new Date();
+    const companiesList = matchedData.map(m => ({
+      symbol: m[1],
+      company: m[2]
+    }));
+    const today = new Date();
+    const companiesWithSymbolsWithTimestamp = {
+      timestamp: today,
+      companiesList
+    };
 
-  const companiesWithSymbolsWithTimestamp = {
-    timestamp: today,
-    companiesList
-  };
+    const filePath = path.join(stockDataCacheDirname, companiesListFilename);
+    fs.mkdirSync(stockDataCacheDirname, { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(companiesWithSymbolsWithTimestamp, null, 2));
 
-  const filePath = path.join(stockDataCacheDirname, companiesListFilename);
-  fs.mkdirSync(stockDataCacheDirname, { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(companiesWithSymbolsWithTimestamp, null, 2));
+    return companiesList;
 
-  return companiesList;
+  } catch (err) {
+    console.error('[ERROR]:[scrapCompanies]', err);
+  }
 }
 
 
@@ -43,16 +47,19 @@ export async function getFreshCompaniesList() {
     const daysSinceUpdate = differenceInDays(new Date(), timestamp);
 
     if (daysSinceUpdate >= 7) {
+      console.log(`[LOG]:[getFreshCompaniesList] Companies list is stale, trying to scrap...`);
       return await scrapCompanies();
     } else {
+      console.log(`[LOG]:[getFreshCompaniesList] Companies list is up to date.`);
       return companiesList;
     }
 
-  } catch (e) {
-    if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
+  } catch (err) {
+    if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+      console.log(`[LOG]:[getFreshCompaniesList] No companies list cache file found, trying to scrap...`);
       return await scrapCompanies();
     } else {
-      throw new Error('Unknown error :(');
+      console.error('[ERROR]:[getFreshCompaniesList]', err);
     }
   }
 }
