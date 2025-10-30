@@ -24,7 +24,7 @@ function createStockDataObject(record: string): StockRecord {
   };
 }
 
-export async function fetchStockData(companySymbol: string) {
+async function fetchStockData(companySymbol: string) {
   const tenYearsAgo = convertNativeDateToStooqDate(subYears(new Date(), 10));
   const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${tenYearsAgo}&i=d`;
 
@@ -70,8 +70,18 @@ export async function getFreshStockData(companySymbol: string, startDate = '2010
     if (stockData.length === 0) throw new Error('Empty cache file');
 
     const minutesSinceUpdate = differenceInMinutes(new Date(), timestamp);
+
     if (minutesSinceUpdate >= 60) {
-      freshStockData = await fetchStockData(companySymbol);
+      console.log(`[LOG]:[getFreshStockData] Stock data for ${companySymbol} is stale, trying to fetch...`);
+      const fetchedStockData = await fetchStockData(companySymbol);
+
+      if (fetchedStockData === undefined || fetchedStockData.length === 0) {
+        console.error(`[ERROR]:[getFreshStockData] Unable to fetch fresh stock data for ${companySymbol}, using stale data from cache`);
+        freshStockData = stockData;
+      } else {
+        freshStockData = fetchedStockData;
+      }
+
     } else {
       freshStockData = stockData;
     }
@@ -80,7 +90,8 @@ export async function getFreshStockData(companySymbol: string, startDate = '2010
     if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
       console.log(`[LOG]:[getFreshStockData] No cache file found for ${companySymbol}, trying to fetch...`);
       freshStockData = await fetchStockData(companySymbol);
-    } else if (err instanceof Error && err.message === 'Empty cache file') {
+    }
+    else if (err instanceof Error && err.message === 'Empty cache file') {
       console.log(`[LOG]:[getFreshStockData] Cache file for ${companySymbol} is empty, trying to fetch...`);
       freshStockData = await fetchStockData(companySymbol);
     }

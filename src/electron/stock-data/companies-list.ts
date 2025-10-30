@@ -6,8 +6,7 @@ import { companiesListFilename, stockDataCacheDirname } from './constants.js';
 import { CompaniesListCache } from './types.js';
 import { timestampParser } from './utils.js';
 
-
-export async function scrapCompanies() {
+async function scrapCompanies() {
   try {
     const res = await fetch(
       'https://pl.tradingview.com/markets/stocks-poland/market-movers-large-cap/');
@@ -36,7 +35,6 @@ export async function scrapCompanies() {
   }
 }
 
-
 export async function getFreshCompaniesList() {
   const filePath = path.join(stockDataCacheDirname, companiesListFilename);
 
@@ -44,21 +42,35 @@ export async function getFreshCompaniesList() {
     const rawData = fs.readFileSync(filePath, 'utf-8');
     const parsedData: CompaniesListCache = JSON.parse(rawData, timestampParser);
     const { timestamp, companiesList } = parsedData;
+
+    if (companiesList.length === 0) throw new Error('Empty cache file');
+
     const daysSinceUpdate = differenceInDays(new Date(), timestamp);
 
     if (daysSinceUpdate >= 7) {
       console.log(`[LOG]:[getFreshCompaniesList] Companies list is stale, trying to scrap...`);
-      return await scrapCompanies();
+      const scrappedCompaniesList = await scrapCompanies();
+
+      if (scrappedCompaniesList === undefined || scrappedCompaniesList.length === 0) {
+        console.error(`[ERROR]:[getFreshCompaniesList] Unable to scrap fresh companies, using stale data from cache`);
+        return companiesList;
+      } else {
+        return scrappedCompaniesList;
+      }
+
     } else {
-      console.log(`[LOG]:[getFreshCompaniesList] Companies list is up to date.`);
       return companiesList;
     }
 
   } catch (err) {
     if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-      console.log(`[LOG]:[getFreshCompaniesList] No companies list cache file found, trying to scrap...`);
+      console.log(`[WARN]:[getFreshCompaniesList] No companies list cache file found, trying to scrap...`);
       return await scrapCompanies();
-    } else {
+    } else if (err instanceof Error && err.message === 'Empty cache file') {
+      console.log(`[ERROR]:[getFreshStockData] Companies list cache file is empty, trying to scrap...`);
+      return await scrapCompanies();
+    }
+    else {
       console.error('[ERROR]:[getFreshCompaniesList]', err);
     }
   }
