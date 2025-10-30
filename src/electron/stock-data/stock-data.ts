@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { differenceInMinutes } from 'date-fns';
+import { differenceInMinutes, subYears } from 'date-fns';
 
 import { stockDataCacheDirname } from "./constants.js";
 import { StockRecord, StockRecordCache } from "./types.js";
@@ -25,7 +25,9 @@ function createStockDataObject(record: string): StockRecord {
 }
 
 export async function fetchStockData(companySymbol: string) {
-  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&i=d`;
+  const tenYearsAgo = convertNativeDateToStooqDate(subYears(new Date(), 10));
+  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${tenYearsAgo}&i=d`;
+
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${companySymbol}`);
