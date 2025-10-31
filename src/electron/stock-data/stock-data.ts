@@ -5,6 +5,7 @@ import { differenceInMinutes, subYears } from 'date-fns';
 import { dataCacheDirname } from "./constants.js";
 import { StockDataRecord, StockRecordCache } from "./types.js";
 import { convertNativeDateToStooqDate, convertStringDateToStooqDate, timestampParser } from './utils.js';
+import { fetchingPeriodYears, staleStockDataMinutes } from './config.js';
 
 function createStockDataObject(record: string): StockDataRecord {
   const recordData = record.split(',');
@@ -26,8 +27,8 @@ function createStockDataObject(record: string): StockDataRecord {
 
 async function fetchStockData(companySymbol: string) {
   const today = convertNativeDateToStooqDate(new Date());
-  const tenYearsAgo = convertNativeDateToStooqDate(subYears(new Date(), 10));
-  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${tenYearsAgo}&d2=${today}&i=d`;
+  const startDate = convertNativeDateToStooqDate(subYears(new Date(), fetchingPeriodYears));
+  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${startDate}&d2=${today}&i=d`;
 
   try {
     const res = await fetch(url);
@@ -54,7 +55,7 @@ async function fetchStockData(companySymbol: string) {
     return stockData;
 
   } catch (err) {
-    console.error('[ERROR]:[fetchStockData]', err);
+    console.error('[ERROR]:[fetchStockData]', err instanceof Error && err.message);
   }
 }
 
@@ -72,7 +73,7 @@ export async function getFreshStockData(companySymbol: string, startDate: string
 
     const minutesSinceUpdate = differenceInMinutes(new Date(), timestamp);
 
-    if (minutesSinceUpdate >= 60) {
+    if (minutesSinceUpdate >= staleStockDataMinutes) {
       console.log(`[LOG]:[getFreshStockData] Stock data for ${companySymbol} is stale, trying to fetch...`);
       const fetchedStockData = await fetchStockData(companySymbol);
 

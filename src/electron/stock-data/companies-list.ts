@@ -5,6 +5,7 @@ import { differenceInDays } from 'date-fns';
 import { companiesListFilename, dataCacheDirname } from './constants.js';
 import { CompaniesListCache } from './types.js';
 import { timestampParser } from './utils.js';
+import { staleCompaniesListDays } from './config.js';
 
 async function scrapCompanies() {
   try {
@@ -47,7 +48,7 @@ export async function getFreshCompaniesList() {
 
     const daysSinceUpdate = differenceInDays(new Date(), timestamp);
 
-    if (daysSinceUpdate >= 7) {
+    if (daysSinceUpdate >= staleCompaniesListDays) {
       console.log(`[LOG]:[getFreshCompaniesList] Companies list is stale, trying to scrap...`);
       const scrappedCompaniesList = await scrapCompanies();
 
