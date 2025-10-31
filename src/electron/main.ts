@@ -7,7 +7,7 @@ import { prepareData } from "./stock-data/prepare-data.js";
 
 app.whenReady().then(async () => {
   const preparedData = await prepareData('20251025');
-  console.log(preparedData);
+  // console.log(preparedData);
 
   const mainWindow = new BrowserWindow({
     width: 1000,

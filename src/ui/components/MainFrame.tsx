@@ -1,19 +1,10 @@
-import { useState } from "react";
+import { SelectRadix as Select } from "../radix/select";
 
 export const MainFrame = () => {
-  const [cheapestDay, setCheapestDay] = useState<string>();
-
-  async function getCheapestDayClick() {
-    const cheapestDay = await window.electron.getCheapestDay();
-    setCheapestDay(cheapestDay);
-  }
-
-
 
   return (
     <div>
-      <span>{cheapestDay}</span>
-      <button onClick={getCheapestDayClick}>Find cheapest day</button>
+      <Select placeholder="Company" />
     </div>
   );
 };

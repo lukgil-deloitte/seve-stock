@@ -21,7 +21,9 @@
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "dependencies": {
+    "@radix-ui/react-icons": "^1.3.2",
     "date-fns": "^4.1.0",
+    "radix-ui": "^1.4.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
