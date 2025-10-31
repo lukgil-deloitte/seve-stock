@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { differenceInDays } from 'date-fns';
 
-import { companiesListFilename, stockDataCacheDirname } from './constants.js';
+import { companiesListFilename, dataCacheDirname } from './constants.js';
 import { CompaniesListCache } from './types.js';
 import { timestampParser } from './utils.js';
 
@@ -24,8 +24,8 @@ async function scrapCompanies() {
       companiesList
     };
 
-    const filePath = path.join(stockDataCacheDirname, companiesListFilename);
-    fs.mkdirSync(stockDataCacheDirname, { recursive: true });
+    const filePath = path.join(dataCacheDirname, companiesListFilename);
+    fs.mkdirSync(dataCacheDirname, { recursive: true });
     fs.writeFileSync(filePath, JSON.stringify(companiesWithSymbolsWithTimestamp, null, 2));
 
     return companiesList;
@@ -36,7 +36,7 @@ async function scrapCompanies() {
 }
 
 export async function getFreshCompaniesList() {
-  const filePath = path.join(stockDataCacheDirname, companiesListFilename);
+  const filePath = path.join(dataCacheDirname, companiesListFilename);
 
   try {
     const rawData = fs.readFileSync(filePath, 'utf-8');

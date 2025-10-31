@@ -1,4 +1,4 @@
-export interface StockRecord {
+export interface StockDataRecord {
   date: string;
   open: number
   high: number
@@ -9,7 +9,7 @@ export interface StockRecord {
 
 export interface StockRecordCache {
   timestamp: Date;
-  stockData: StockRecord[]
+  stockData: StockDataRecord[]
 }
 
 export interface CompanyWithSymbol {

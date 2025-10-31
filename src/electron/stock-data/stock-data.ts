@@ -2,11 +2,11 @@ import path from 'path';
 import fs from 'fs';
 import { differenceInMinutes, subYears } from 'date-fns';
 
-import { stockDataCacheDirname } from "./constants.js";
-import { StockRecord, StockRecordCache } from "./types.js";
+import { dataCacheDirname } from "./constants.js";
+import { StockDataRecord, StockRecordCache } from "./types.js";
 import { convertNativeDateToStooqDate, convertStringDateToStooqDate, timestampParser } from './utils.js';
 
-function createStockDataObject(record: string): StockRecord {
+function createStockDataObject(record: string): StockDataRecord {
   const recordData = record.split(',');
   const open = parseFloat(recordData[1]);
   const high = parseFloat(recordData[2]);
@@ -25,8 +25,9 @@ function createStockDataObject(record: string): StockRecord {
 }
 
 async function fetchStockData(companySymbol: string) {
+  const today = convertNativeDateToStooqDate(new Date());
   const tenYearsAgo = convertNativeDateToStooqDate(subYears(new Date(), 10));
-  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${tenYearsAgo}&i=d`;
+  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${tenYearsAgo}&d2=${today}&i=d`;
 
   try {
     const res = await fetch(url);
@@ -46,8 +47,8 @@ async function fetchStockData(companySymbol: string) {
       stockData
     };
 
-    const filePath = path.join(stockDataCacheDirname, `${companySymbol}.json`);
-    fs.mkdirSync(stockDataCacheDirname, { recursive: true });
+    const filePath = path.join(dataCacheDirname, `${companySymbol}.json`);
+    fs.mkdirSync(dataCacheDirname, { recursive: true });
     fs.writeFileSync(filePath, JSON.stringify(stockDataWithTimestamp, null, 2));
 
     return stockData;
@@ -57,10 +58,10 @@ async function fetchStockData(companySymbol: string) {
   }
 }
 
-export async function getFreshStockData(companySymbol: string, startDate = '20100101') {
+export async function getFreshStockData(companySymbol: string, startDate: string) {
   const endDate = convertNativeDateToStooqDate(new Date());
-  const filePath = path.join(stockDataCacheDirname, `${companySymbol}.json`);
-  let freshStockData: StockRecord[] | undefined;
+  const filePath = path.join(dataCacheDirname, `${companySymbol}.json`);
+  let freshStockData: StockDataRecord[] | undefined;
 
   try {
     const rawData = fs.readFileSync(filePath, 'utf-8');
