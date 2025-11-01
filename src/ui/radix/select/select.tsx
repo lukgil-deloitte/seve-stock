@@ -1,13 +1,20 @@
 import { Select } from 'radix-ui';
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 
-interface SelectRadixProps {
-  placeholder?: string;
+import { selectContent } from './select.module.scss';
+
+export interface SelectOption {
+  value: string;
+  label: string
 }
 
-export const SelectRadix = ({ placeholder }: SelectRadixProps) => (
-  <Select.Root>
+interface SelectProps {
+  placeholder?: string;
+  options: SelectOption[]
+}
 
+export const SelectRadix = ({ placeholder, options }: SelectProps) => (
+  <Select.Root>
     <Select.Trigger>
       <Select.Value placeholder={placeholder} />
       <Select.Icon>
@@ -16,19 +23,12 @@ export const SelectRadix = ({ placeholder }: SelectRadixProps) => (
     </Select.Trigger>
 
     <Select.Portal>
-      <Select.Content>
+      <Select.Content className={selectContent}>
         <Select.Viewport>
-
-          <SelectItem value={'Dupsko'}>Dupa</SelectItem>
-          <SelectItem value={'Qupsko'}>Qupa</SelectItem>
-          <SelectItem value={'Wupsko'}>Wupa</SelectItem>
-          <SelectItem value={'Eupsko'}>Eupa</SelectItem>
-          <SelectItem value={'Rupsko'}>Rupa</SelectItem>
-
+          {options.map(({ label, value }) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
         </Select.Viewport>
       </Select.Content>
     </Select.Portal>
-
   </Select.Root>
 );
 
@@ -39,8 +39,5 @@ const SelectItem = ({ children, ...props }: SelectItemProps) => (
     {...props}
   >
     <Select.ItemText>{children}</Select.ItemText>
-    <Select.ItemIndicator>
-      {/* <CheckIcon /> */}
-    </Select.ItemIndicator>
   </Select.Item>
 );

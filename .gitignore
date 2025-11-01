@@ -3,3 +3,4 @@ dist
 dist-react
 dist-electron
 data-cache
+src/ui/**/*module.scss.d.ts

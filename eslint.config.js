@@ -10,6 +10,7 @@ export default tseslint.config([
   globalIgnores(["dist", "dist-electron", "dist-react", "data-cache"]),
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: ["src/ui/**/*.scss.d.ts"],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
