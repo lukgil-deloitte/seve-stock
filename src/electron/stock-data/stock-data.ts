@@ -106,4 +106,3 @@ export async function getFreshStockData(companySymbol: string, startDate: string
     convertStringDateToStooqDate(stockRecord.date) >= startDate &&
     convertStringDateToStooqDate(stockRecord.date) <= endDate);
 }
-

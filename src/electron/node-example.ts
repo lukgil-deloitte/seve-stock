@@ -16,7 +16,7 @@ export function sendRamUsage(mainWindow: BrowserWindow) {
 
     ipcWebContentsSend("ramUsage", mainWindow.webContents, {
       totalRam,
-      freeRam,
+      freeRam
     });
   }, pollingInterval);
 }

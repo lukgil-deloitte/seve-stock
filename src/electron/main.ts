@@ -13,8 +13,8 @@ app.whenReady().then(async () => {
     width: 1000,
     height: 800,
     webPreferences: {
-      preload: getPreloadPath(),
-    },
+      preload: getPreloadPath()
+    }
   });
 
   if (isDev()) {

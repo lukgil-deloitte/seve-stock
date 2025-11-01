@@ -4,9 +4,10 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import { globalIgnores } from "eslint/config";
+import react from "eslint-plugin-react";
 
 export default tseslint.config([
-  globalIgnores(["dist", "dist-electron", "dist-react"]),
+  globalIgnores(["dist", "dist-electron", "dist-react", "data-cache"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -19,9 +20,18 @@ export default tseslint.config([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    plugins: {
+      react
+    },
     rules: {
       "@typescript-eslint/no-unused-vars": "warn",
-      semi: ["error", "always"]
+      semi: ["error", "always"],
+      "react/jsx-tag-spacing": ["error", {
+        "beforeClosing": "never"
+      }],
+      "comma-dangle": ["error", "never"],
+      "no-multiple-empty-lines": ["error", { "max": 1, "maxBOF": 0, "maxEOF": 0 }],
+      "eol-last": ["error", "never"] //WARN: this may cause issues
     },
   },
 ]);
