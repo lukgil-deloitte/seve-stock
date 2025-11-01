@@ -1,22 +1,18 @@
 interface Window {
   electron: {
-    getCpuModel: () => Promise<string>;
-    subscribeToRamUsage: (
-      callback: (ramUsage: RamUsage) => void
-    ) => UnsubscribeFn;
     getCheapestDay: () => Promise<string>
+    getCompaniesList: () => Promise<CompaniesList>
   };
 }
 
-type RamUsage = {
-  totalRam: number;
-  freeRam: number;
-};
-
 type EventPayloadMap = {
-  getCpuModel: string;
-  ramUsage: RamUsage;
   getCheapestDay: string;
+  getCompaniesList: CompaniesList
 };
 
-type UnsubscribeFn = () => void;
+interface CompanyWithSymbol {
+  symbol: string
+  company: string
+}
+
+type CompaniesList = CompanyWithSymbol[]

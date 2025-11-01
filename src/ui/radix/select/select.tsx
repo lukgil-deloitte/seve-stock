@@ -1,12 +1,14 @@
 import { Select } from 'radix-ui';
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 
-import { selectContent } from './select.module.scss';
+import { selectContent, selectItem, selectTrigger } from './select.module.scss';
 
-export interface SelectOption {
+interface SelectOption {
   value: string;
   label: string
 }
+
+export type SelectOptions = SelectOption[]
 
 interface SelectProps {
   placeholder?: string;
@@ -15,7 +17,7 @@ interface SelectProps {
 
 export const SelectRadix = ({ placeholder, options }: SelectProps) => (
   <Select.Root>
-    <Select.Trigger>
+    <Select.Trigger className={selectTrigger}>
       <Select.Value placeholder={placeholder} />
       <Select.Icon>
         <ChevronDownIcon />
@@ -25,7 +27,7 @@ export const SelectRadix = ({ placeholder, options }: SelectProps) => (
     <Select.Portal>
       <Select.Content className={selectContent}>
         <Select.Viewport>
-          {options.map(({ label, value }) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+          {options.map(({ label, value }) => <SelectItem className={selectItem} key={value} value={value}>{label}</SelectItem>)}
         </Select.Viewport>
       </Select.Content>
     </Select.Portal>

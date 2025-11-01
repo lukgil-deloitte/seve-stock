@@ -1,17 +1,11 @@
-import { getFreshCompaniesList } from "./companies-list.js";
 import { getFreshStockData } from "./stock-data.js";
-import { StockDataRecord } from "./types.js";
+import { PreparedData } from "./types.js";
 
-interface CompanyWithStockData {
-  company: string;
-  stockData: StockDataRecord[]
-}
-
-type PreparedData = Record<string, CompanyWithStockData>
-
-export async function prepareData(stooqDate: string) {
-  const companiesList = await getFreshCompaniesList();
-  if (companiesList === undefined) return;
+export async function prepareData(stooqDate: string, companiesList: CompaniesList | undefined) {
+  if (companiesList === undefined) {
+    console.error('[ERROR]:[prepareData] Companies list is undefined');
+    return;
+  }
 
   const preparedData: PreparedData = {};
 

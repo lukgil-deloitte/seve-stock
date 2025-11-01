@@ -12,12 +12,14 @@ export interface StockRecordCache {
   stockData: StockDataRecord[]
 }
 
-export interface CompanyWithSymbol {
-  symbol: string
-  company: string
-}
-
 export interface CompaniesListCache {
   timestamp: Date
-  companiesList: CompanyWithSymbol[]
+  companiesList: CompaniesList
 }
+
+interface CompanyWithStockData {
+  company: string;
+  stockData: StockDataRecord[]
+}
+
+export type PreparedData = Record<string, CompanyWithStockData>

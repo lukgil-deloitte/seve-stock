@@ -1,11 +1,8 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
-  getCpuModel: () => ipcInvoke("getCpuModel"),
-  subscribeToRamUsage: (callback) => {
-    return ipcOn("ramUsage", (ramUsage) => callback(ramUsage));
-  },
-  getCheapestDay: () => ipcInvoke('getCheapestDay')
+  getCheapestDay: () => ipcInvoke('getCheapestDay'),
+  getCompaniesList: () => ipcInvoke('getCompaniesList')
 } satisfies Window["electron"]);
 
 function ipcInvoke<Key extends keyof EventPayloadMap>(
