@@ -1,22 +1,17 @@
-import { useEffect, useState } from "react";
-import { SelectRadix as Select, type SelectOptions } from "../radix/select/select";
+import { Combobox, Select } from "../design-system";
+import { useCompaniesList } from "../hooks/useCompaniesList";
+
+function createSelectOptions(companiesList: CompaniesList | undefined) {
+  return companiesList?.map(({ company, symbol }) => ({ label: company, value: symbol })) ?? [];
+}
 
 export const MainFrame = () => {
-  const [selectOptions, setSelectOptions] = useState<SelectOptions>([]);
-
-  // przenies do osobnego hooka
-  useEffect(() => {
-    async function getCompaniesList() {
-      const companiesList = await window.electron.getCompaniesList();
-      setSelectOptions(companiesList.map(({ company, symbol }) => ({ label: company, value: symbol })));
-    }
-
-    getCompaniesList();
-  }, []);
+  const companiesList = useCompaniesList();
 
   return (
     <div>
-      <Select placeholder="Company" options={selectOptions} />
+      <Select placeholder="Company" options={createSelectOptions(companiesList)} />
+      <Combobox options={createSelectOptions(companiesList)} />
     </div>
   );
-};
+}; 

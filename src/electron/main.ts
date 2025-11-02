@@ -28,6 +28,8 @@ app.whenReady().then(async () => {
   mainWindow.webContents.openDevTools();
   ipcMainHandle("getCompaniesList", () => companiesList ?? []);
 
+  //TODO: subscribe to logs
+
   mainWindow.on("closed", () => {
     app.quit();
   });

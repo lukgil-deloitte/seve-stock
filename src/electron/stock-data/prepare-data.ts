@@ -3,7 +3,7 @@ import { PreparedData } from "./types.js";
 
 export async function prepareData(stooqDate: string, companiesList: CompaniesList | undefined) {
   if (companiesList === undefined) {
-    console.error('[ERROR]:[prepareData] Companies list is undefined');
+    console.error('[ERROR]:[prepareData] Companies list is undefined.');
     return;
   }
 

@@ -65,7 +65,7 @@ export async function getFreshCompaniesList() {
 
   } catch (err) {
     if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-      console.log(`[WARN]:[getFreshCompaniesList] No companies list cache file found, trying to scrap...`);
+      console.log(`[LOG]:[getFreshCompaniesList] No companies list cache file found, trying to scrap...`);
       return await scrapCompanies();
     } else if (err instanceof Error && err.message === 'Empty cache file') {
       console.log(`[ERROR]:[getFreshStockData] Companies list cache file is empty, trying to scrap...`);
