@@ -2,7 +2,7 @@ import { Combobox, Select } from "../design-system";
 import { useCompaniesList } from "../hooks/useCompaniesList";
 
 function createSelectOptions(companiesList: CompaniesList | undefined) {
-  return companiesList?.map(({ company, symbol }) => ({ label: company, value: symbol })) ?? [];
+  return companiesList?.map(({ company, ticker }) => ({ label: company, value: ticker })) ?? [];
 }
 
 export const MainFrame = () => {

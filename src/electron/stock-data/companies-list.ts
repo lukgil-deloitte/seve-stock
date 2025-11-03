@@ -7,17 +7,20 @@ import { CompaniesListCache } from './types.js';
 import { timestampParser } from './utils.js';
 import { staleCompaniesListDays } from './config.js';
 
+const companyDataRegex = /data-rowkey="GPW:([A-Z]+)[\s\S]*?https:\/\/s3-symbol-logo\.tradingview\.com\/([^.]+)[\s\S]*?title="(?:[^"]*−\s*)?([^"]+)"/g;
+const redundantSuffixRegex = /\(?\b(?:Sp[oó]lka\s+Akcyjna|S\s*\.?\s*A\.?)\b\.?\)?/gi;
+const pageWithCompaniesList = 'https://pl.tradingview.com/markets/stocks-poland/market-movers-large-cap/';
+
 async function scrapCompanies() {
   try {
-    const res = await fetch(
-      'https://pl.tradingview.com/markets/stocks-poland/market-movers-large-cap/');
+    const res = await fetch(pageWithCompaniesList);
     const html = await res.text();
-    const matchedData = [...html.matchAll(
-      /data-rowkey="GPW:([A-Z]+)[\s\S]*?https:\/\/s3-symbol-logo\.tradingview\.com\/([^.]+)/g)];
+    const matchedData = [...html.matchAll(companyDataRegex)];
 
     const companiesList = matchedData.map(m => ({
-      symbol: m[1],
-      company: m[2]
+      ticker: m[1],
+      company: m[2],
+      fullname: m[3].replace(redundantSuffixRegex, '').trim()
     }));
     const today = new Date();
     const companiesWithSymbolsWithTimestamp = {

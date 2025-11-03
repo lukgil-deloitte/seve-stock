@@ -9,9 +9,9 @@ export async function prepareData(stooqDate: string, companiesList: CompaniesLis
 
   const preparedData: PreparedData = {};
 
-  for (const { symbol, company } of companiesList) {
-    const stockData = await getFreshStockData(symbol, stooqDate) ?? [];
-    preparedData[symbol] = { company, stockData };
+  for (const { ticker, company, fullname } of companiesList) {
+    const stockData = await getFreshStockData(ticker, stooqDate) ?? [];
+    preparedData[ticker] = { company, fullname, stockData };
   }
 
   return preparedData;

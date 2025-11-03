@@ -19,6 +19,7 @@ export interface CompaniesListCache {
 
 interface CompanyWithStockData {
   company: string;
+  fullname: string;
   stockData: StockDataRecord[]
 }
 

@@ -25,18 +25,18 @@ function createStockDataObject(record: string): StockDataRecord {
   };
 }
 
-async function fetchStockData(companySymbol: string) {
+async function fetchStockData(ticker: string) {
   const today = convertNativeDateToStooqDate(new Date());
   const startDate = convertNativeDateToStooqDate(subYears(new Date(), fetchingPeriodYears));
-  const url = `https://stooq.com/q/d/l/?s=${companySymbol}&d1=${startDate}&d2=${today}&i=d`;
+  const url = `https://stooq.com/q/d/l/?s=${ticker}&d1=${startDate}&d2=${today}&i=d`;
 
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status} for ${companySymbol}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status} for ${ticker}`);
 
     const data = await res.text();
-    if (!data || data.trim().length === 0) throw new Error(`Empty response for ${companySymbol}`);
-    if (data === 'Exceeded the daily hits limit') throw new Error(`Exceeded the daily hits limit when fetching ${companySymbol}`);
+    if (!data || data.trim().length === 0) throw new Error(`Empty response for ${ticker}`);
+    if (data === 'Exceeded the daily hits limit') throw new Error(`Exceeded the daily hits limit when fetching ${ticker}`);
 
     const records = data.trim().split(/\r?\n/);
     records.shift();
@@ -48,7 +48,7 @@ async function fetchStockData(companySymbol: string) {
       stockData
     };
 
-    const filePath = path.join(dataCacheDirname, `${companySymbol}.json`);
+    const filePath = path.join(dataCacheDirname, `${ticker}.json`);
     fs.mkdirSync(dataCacheDirname, { recursive: true });
     fs.writeFileSync(filePath, JSON.stringify(stockDataWithTimestamp, null, 2));
 
@@ -59,9 +59,9 @@ async function fetchStockData(companySymbol: string) {
   }
 }
 
-export async function getFreshStockData(companySymbol: string, startDate: string) {
+export async function getFreshStockData(ticker: string, startDate: string) {
   const endDate = convertNativeDateToStooqDate(new Date());
-  const filePath = path.join(dataCacheDirname, `${companySymbol}.json`);
+  const filePath = path.join(dataCacheDirname, `${ticker}.json`);
   let freshStockData: StockDataRecord[] | undefined;
 
   try {
@@ -74,11 +74,11 @@ export async function getFreshStockData(companySymbol: string, startDate: string
     const minutesSinceUpdate = differenceInMinutes(new Date(), timestamp);
 
     if (minutesSinceUpdate >= staleStockDataMinutes) {
-      console.log(`[LOG]:[getFreshStockData] Stock data for ${companySymbol} is stale, trying to fetch...`);
-      const fetchedStockData = await fetchStockData(companySymbol);
+      console.log(`[LOG]:[getFreshStockData] Stock data for ${ticker} is stale, trying to fetch...`);
+      const fetchedStockData = await fetchStockData(ticker);
 
       if (fetchedStockData === undefined || fetchedStockData.length === 0) {
-        console.error(`[ERROR]:[getFreshStockData] Unable to fetch fresh stock data for ${companySymbol}, using stale data from cache`);
+        console.error(`[ERROR]:[getFreshStockData] Unable to fetch fresh stock data for ${ticker}, using stale data from cache`);
         freshStockData = stockData;
       } else {
         freshStockData = fetchedStockData;
@@ -90,12 +90,12 @@ export async function getFreshStockData(companySymbol: string, startDate: string
 
   } catch (err) {
     if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-      console.log(`[LOG]:[getFreshStockData] No cache file found for ${companySymbol}, trying to fetch...`);
-      freshStockData = await fetchStockData(companySymbol);
+      console.log(`[LOG]:[getFreshStockData] No cache file found for ${ticker}, trying to fetch...`);
+      freshStockData = await fetchStockData(ticker);
     }
     else if (err instanceof Error && err.message === 'Empty cache file') {
-      console.log(`[LOG]:[getFreshStockData] Cache file for ${companySymbol} is empty, trying to fetch...`);
-      freshStockData = await fetchStockData(companySymbol);
+      console.log(`[LOG]:[getFreshStockData] Cache file for ${ticker} is empty, trying to fetch...`);
+      freshStockData = await fetchStockData(ticker);
     }
     else {
       console.error('[ERROR]:[getFreshStockData]', err);

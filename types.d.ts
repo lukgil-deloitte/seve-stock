@@ -11,8 +11,9 @@ type EventPayloadMap = {
 };
 
 interface CompanyWithSymbol {
-  symbol: string
+  ticker: string
   company: string
+  fullname: string
 }
 
 type CompaniesList = CompanyWithSymbol[]
