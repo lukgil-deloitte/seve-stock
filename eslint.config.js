@@ -26,6 +26,7 @@ export default tseslint.config([
     },
     rules: {
       "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
       semi: ["error", "always"],
       "react/jsx-tag-spacing": ["error", {
         "beforeClosing": "never"

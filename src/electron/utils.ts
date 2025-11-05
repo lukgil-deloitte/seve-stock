@@ -8,9 +8,9 @@ export function isDev() {
 
 export function ipcMainHandle<Key extends keyof EventPayloadMap>(
   key: Key,
-  handler: () => EventPayloadMap[Key]
+  handler: (...args: any[]) => EventPayloadMap[Key]
 ) {
-  ipcMain.handle(key, (event) => {
+  ipcMain.handle(key, (event, ...args) => {
     const senderFrame = event.senderFrame;
 
     if (senderFrame === null) {
@@ -18,7 +18,7 @@ export function ipcMainHandle<Key extends keyof EventPayloadMap>(
     }
 
     validateEventFrame(senderFrame);
-    return handler();
+    return handler(...args);
   });
 }
 

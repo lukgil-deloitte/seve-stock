@@ -1,13 +1,13 @@
 interface Window {
   electron: {
-    getCheapestDay: () => Promise<string>
-    getCompaniesList: () => Promise<CompaniesList>
+    getCompaniesList: () => Promise<CompaniesList | undefined>
+    getCompanyStockData: (ticker, startDate) => Promise<CompanyStockData | undefined>
   };
 }
 
 type EventPayloadMap = {
-  getCheapestDay: string;
-  getCompaniesList: CompaniesList
+  getCompaniesList: Promise<CompaniesList | undefined>
+  getCompanyStockData: Promise<CompanyStockData | undefined>
 };
 
 interface CompanyWithSymbol {
@@ -17,3 +17,14 @@ interface CompanyWithSymbol {
 }
 
 type CompaniesList = CompanyWithSymbol[]
+
+interface StockDataRecord {
+  date: string;
+  open: number
+  high: number
+  low: number
+  close: number
+  avg: number
+};
+
+type CompanyStockData = StockDataRecord[]

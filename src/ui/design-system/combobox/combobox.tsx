@@ -18,11 +18,12 @@ type ComboboxOptions = ComboboxOption[]
 
 interface ComboboxProps {
   options: ComboboxOptions
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>
 }
 
-export const Combobox = ({ options }: ComboboxProps) => {
+export const Combobox = ({ options, value, setValue }: ComboboxProps) => {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
   const matches = () => {

@@ -1,15 +1,6 @@
-export interface StockDataRecord {
-  date: string;
-  open: number
-  high: number
-  low: number
-  close: number
-  avg: number
-};
-
 export interface StockRecordCache {
-  timestamp: Date;
-  stockData: StockDataRecord[]
+  timestamp: Date
+  stockData: CompanyStockData
 }
 
 export interface CompaniesListCache {
@@ -18,9 +9,9 @@ export interface CompaniesListCache {
 }
 
 interface CompanyWithStockData {
-  company: string;
-  fullname: string;
-  stockData: StockDataRecord[]
+  company: string
+  fullname: string
+  stockData: CompanyStockData
 }
 
 export type PreparedData = Record<string, CompanyWithStockData>

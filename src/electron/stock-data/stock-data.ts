@@ -3,7 +3,7 @@ import fs from 'fs';
 import { differenceInMinutes, subYears } from 'date-fns';
 
 import { dataCacheDirname } from "./constants.js";
-import { StockDataRecord, StockRecordCache } from "./types.js";
+import { StockRecordCache } from "./types.js";
 import { convertNativeDateToStooqDate, convertStringDateToStooqDate, timestampParser } from './utils.js';
 import { fetchingPeriodYears, staleStockDataMinutes } from './config.js';
 
@@ -59,10 +59,10 @@ async function fetchStockData(ticker: string) {
   }
 }
 
-export async function getFreshStockData(ticker: string, startDate: string) {
+export async function getFreshStockData(ticker: string, stooqStartDate: string) {
   const endDate = convertNativeDateToStooqDate(new Date());
   const filePath = path.join(dataCacheDirname, `${ticker}.json`);
-  let freshStockData: StockDataRecord[] | undefined;
+  let freshStockData: CompanyStockData | undefined;
 
   try {
     const rawData = fs.readFileSync(filePath, 'utf-8');
@@ -103,6 +103,6 @@ export async function getFreshStockData(ticker: string, startDate: string) {
   }
 
   return freshStockData?.filter((stockRecord) =>
-    convertStringDateToStooqDate(stockRecord.date) >= startDate &&
+    convertStringDateToStooqDate(stockRecord.date) >= stooqStartDate &&
     convertStringDateToStooqDate(stockRecord.date) <= endDate);
 }
