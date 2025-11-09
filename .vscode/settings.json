@@ -1,5 +1,5 @@
 {
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true // wymusza użycie fixów z ESLinta
+        "source.fixAll.eslint": true
     },
 }
